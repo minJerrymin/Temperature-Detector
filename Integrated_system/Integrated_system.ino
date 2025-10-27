@@ -4,12 +4,12 @@
 #include <SPI.h>
 #include <WiFiNINA.h>
 #include <PubSubClient.h>
-#include "arduino_secrets.h" 
-#include <utility/wifi_drv.h>   // library to drive to RGB LED on the MKR1010
-#include "DHT.h"   // Library to temperature and humidity sensor 
+#include "arduino_secrets.h"
+#include <utility/wifi_drv.h>  // library to drive to RGB LED on the MKR1010
+#include "DHT.h"               // Library to temperature and humidity sensor
 
-#define DHTPIN 1      // DHT22 connected to pin 1
-#define DHTTYPE DHT22 
+#define DHTPIN 1  // DHT22 connected to pin 1
+#define DHTTYPE DHT22
 DHT dht(DHTPIN, DHTTYPE);
 
 /*
@@ -20,32 +20,32 @@ DHT dht(DHTPIN, DHTTYPE);
 #define SECRET_MQTTUSER "user name - eg student"
 #define SECRET_MQTTPASS "password";
  */
-const char* ssid          = SECRET_SSID;
-const char* password      = SECRET_PASS;
+const char* ssid = SECRET_SSID;
+const char* password = SECRET_PASS;
 //const char* ssid1         = SECRET_SSID1;
 //const char* password1     = SECRET_PASS1;
 const char* mqtt_username = SECRET_MQTTUSER;
 const char* mqtt_password = SECRET_MQTTPASS;
-const char* mqtt_server   = "mqtt.cetools.org";
-const int mqtt_port       = 1884;
+const char* mqtt_server = "mqtt.cetools.org";
+const int mqtt_port = 1884;
 
 // create wifi object and mqtt object
 WiFiClient wifiClient;
 PubSubClient mqttClient(wifiClient);
 
 // Make sure to update your lightid value below with the one you have been allocated
-String lightId = "18"; // the topic id number or user number being used.
+String lightId = "18";  // the topic id number or user number being used.
 
 // Here we define the MQTT topic we will be publishing data to
-String mqtt_topic = "student/CASA0014/luminaire/" + lightId;            
-String clientId = ""; // will set once i have mac address so that it is unique
+String mqtt_topic = "student/CASA0014/luminaire/" + lightId;
+String clientId = "";  // will set once i have mac address so that it is unique
 
-// NeoPixel Configuration - we need to know this to know how to send messages 
-// to vespera 
+// NeoPixel Configuration - we need to know this to know how to send messages
+// to vespera
 const int num_leds = 72;
-const int payload_size = num_leds * 3; // x3 for RGB
+const int payload_size = num_leds * 3;  // x3 for RGB
 
-// Create the byte array to send in MQTT payload this stores all the colours 
+// Create the byte array to send in MQTT payload this stores all the colours
 // in memory so that they can be accessed in for example the rainbow function
 byte RGBpayload[payload_size];
 
@@ -71,31 +71,30 @@ void setup() {
   mqttClient.setServer(mqtt_server, mqtt_port);
   mqttClient.setBufferSize(2000);
   mqttClient.setCallback(callback);
-  
+
   Serial.println("Set-up complete");
 
   dht.begin();  // Initiate the DHT22 sensor
-
 }
- 
+
 void loop() {
   // Reconnect if necessary
   if (!mqttClient.connected()) {
     reconnectMQTT();
   }
-  
-  if (WiFi.status() != WL_CONNECTED){
+
+  if (WiFi.status() != WL_CONNECTED) {
     startWifi();
   }
   // keep mqtt alive
   mqttClient.loop();
 
 
-    static unsigned long lastUpdate = 0;
+  static unsigned long lastUpdate = 0;
   unsigned long now = millis();
 
-  if (now - lastUpdate >= 200) {  
-    float temp = dht.readTemperature();//Read the DHT22 datas every 0.2 seconds
+  if (now - lastUpdate >= 200) {
+    float temp = dht.readTemperature();  //Read the DHT22 datas every 0.2 seconds
 
     if (isnan(temp)) {
       Serial.println("Failed to read from DHT22 sensor!");
@@ -104,12 +103,12 @@ void loop() {
       Serial.println(temp);
 
       int r, g, b;
-      temperatureToRGB(temp, r, g, b);//Temperature variations are mapped to spectral changes
+      temperatureToRGB(temp, r, g, b);  //Temperature variations are mapped to spectral changes
 
 
 
 
-    
+
       for (int pixel = 0; pixel < num_leds; pixel++) {
         RGBpayload[pixel * 3 + 0] = (byte)r;
         RGBpayload[pixel * 3 + 1] = (byte)g;
@@ -119,14 +118,16 @@ void loop() {
       mqttClient.publish(mqtt_topic.c_str(), RGBpayload, payload_size);
 
       Serial.print("Published color RGB(");
-      Serial.print(r); Serial.print(", ");
-      Serial.print(g); Serial.print(", ");
-      Serial.print(b); Serial.println(")");
+      Serial.print(r);
+      Serial.print(", ");
+      Serial.print(g);
+      Serial.print(", ");
+      Serial.print(b);
+      Serial.println(")");
     }
 
     lastUpdate = now;
   }
-
 }
 
 // Function to update the R, G, B values of a single LED pixel
@@ -135,13 +136,13 @@ void send_RGB_to_pixel(int r, int g, int b, int pixel) {
   // Check if the mqttClient is connected before publishing
   if (mqttClient.connected()) {
     // Update the byte array with the specified RGB color pattern
-    RGBpayload[pixel * 3 + 0] = (byte)r; // Red
-    RGBpayload[pixel * 3 + 1] = (byte)g; // Green
-    RGBpayload[pixel * 3 + 2] = (byte)b; // Blue
+    RGBpayload[pixel * 3 + 0] = (byte)r;  // Red
+    RGBpayload[pixel * 3 + 1] = (byte)g;  // Green
+    RGBpayload[pixel * 3 + 2] = (byte)b;  // Blue
 
     // Publish the byte array
     mqttClient.publish(mqtt_topic.c_str(), RGBpayload, payload_size);
-    
+
     Serial.println("Published whole byte array after updating a single pixel.");
   } else {
     Serial.println("MQTT mqttClient not connected, cannot publish from *send_RGB_to_pixel*.");
@@ -153,14 +154,14 @@ void send_all_off() {
   // Check if the mqttClient is connected before publishing
   if (mqttClient.connected()) {
     // Fill the byte array with the specified RGB color pattern
-    for(int pixel=0; pixel < num_leds; pixel++){
-      RGBpayload[pixel * 3 + 0] = (byte)0; // Red
-      RGBpayload[pixel * 3 + 1] = (byte)0; // Green
-      RGBpayload[pixel * 3 + 2] = (byte)0; // Blue
+    for (int pixel = 0; pixel < num_leds; pixel++) {
+      RGBpayload[pixel * 3 + 0] = (byte)0;  // Red
+      RGBpayload[pixel * 3 + 1] = (byte)0;  // Green
+      RGBpayload[pixel * 3 + 2] = (byte)0;  // Blue
     }
     // Publish the byte array
     mqttClient.publish(mqtt_topic.c_str(), RGBpayload, payload_size);
-    
+
     Serial.println("Published an all zero (off) byte array.");
   } else {
     Serial.println("MQTT mqttClient not connected, cannot publish from *send_all_off*.");
@@ -171,14 +172,14 @@ void send_all_random() {
   // Check if the mqttClient is connected before publishing
   if (mqttClient.connected()) {
     // Fill the byte array with the specified RGB color pattern
-    for(int pixel=0; pixel < num_leds; pixel++){
-      RGBpayload[pixel * 3 + 0] = (byte)random(50,256); // Red - 256 is exclusive, so it goes up to 255
-      RGBpayload[pixel * 3 + 1] = (byte)random(50,256); // Green
-      RGBpayload[pixel * 3 + 2] = (byte)random(50,256); // Blue
+    for (int pixel = 0; pixel < num_leds; pixel++) {
+      RGBpayload[pixel * 3 + 0] = (byte)random(50, 256);  // Red - 256 is exclusive, so it goes up to 255
+      RGBpayload[pixel * 3 + 1] = (byte)random(50, 256);  // Green
+      RGBpayload[pixel * 3 + 2] = (byte)random(50, 256);  // Blue
     }
     // Publish the byte array
     mqttClient.publish(mqtt_topic.c_str(), RGBpayload, payload_size);
-    
+
     Serial.println("Published an all random byte array.");
   } else {
     Serial.println("MQTT mqttClient not connected, cannot publish from *send_all_random*.");
@@ -198,33 +199,43 @@ void printMacAddress(byte mac[]) {
   Serial.println();
 }
 
-void temperatureToRGB(float temp, int &r, int &g, int &b) {
-  
-  if (temp < 23) temp = 23;
-  if (temp > 27) temp = 27;// Restricted temperature range: 23–27°C
+void temperatureToRGB(float temp, int& r, int& g, int& b) {
 
-  float ratio = (temp - 23.0) / 4.0;  
+  if (temp < 21) temp = 21;
+  if (temp > 41) temp = 41;  // Restricted temperature range
+
+  float ratio = (temp - 21.0) / 20.0;
   // Normalise the temperature to obtain a ratio representing the position of the temperature within the RGB interval.
 
-  if (ratio < 0.25) {
+  if (ratio < 0.1667) {
+    // Purple to Blue
+    r = int(255 * (ratio / 0.1667));  //0-255
+    g = 0;
+    b = 255;
+  } else if (ratio < 0.3333) {
     // Blue to Azure
     r = 0;
-    g = int(1020 * ratio);     // 0-255
+    g = int(255 * ((ratio - 0.1667) / 0.1667));  // 0-255
     b = 255;
   } else if (ratio < 0.5) {
     // Azure to Green
     r = 0;
     g = 255;
-    b = int(255 - 1020 * (ratio - 0.25));
-  } else if (ratio < 0.75) { 
+    b = int(255 - 255 * ((ratio - 0.3333) / 0.1667));
+  } else if (ratio < 0.6667) {
     // Green to Yellow
-    r = int(1020 * (ratio - 0.5));
+    r = int(255 * ((ratio - 0.5) / 0.1667));
     g = 255;
     b = 0;
-  } else {
-    // Yellow to Red
+  } else if (ratio < 0.8333) {
+    // Yellow to orange
     r = 255;
-    g = int(255 - 1020 * (ratio - 0.75));
+    g = int(255 - 128 * ((ratio - 0.6667) / 0.1667));
+    b = 0;
+  } else {
+    // Orange to Red
+    r = 255;
+    g = int(127 - 127 * ((ratio - 0.8333) / 0.1667));
     b = 0;
   }
 }
