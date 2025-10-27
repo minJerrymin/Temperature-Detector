@@ -198,25 +198,33 @@ void printMacAddress(byte mac[]) {
   Serial.println();
 }
 
-// Assign fixed colours according to temperature ranges
 void temperatureToRGB(float temp, int &r, int &g, int &b) {
- 
+  
   if (temp < 23) temp = 23;
-  if (temp > 27) temp = 27;
+  if (temp > 27) temp = 27;// Restricted temperature range: 23–27°C
 
- 
-  if (temp < 24.0) {
-   
-    r = 0; g = 0; b = 255;
-  } else if (temp < 25.0) {
-   
-    r = 0; g = 255; b = 0;
-  } else if (temp < 26.0) {
-    
-    r = 255; g = 255; b = 0;
+  float ratio = (temp - 23.0) / 4.0;  
+  // Normalise the temperature to obtain a ratio representing the position of the temperature within the RGB interval.
+
+  if (ratio < 0.25) {
+    // Blue to Azure
+    r = 0;
+    g = int(1020 * ratio);     // 0-255
+    b = 255;
+  } else if (ratio < 0.5) {
+    // Azure to Green
+    r = 0;
+    g = 255;
+    b = int(255 - 1020 * (ratio - 0.25));
+  } else if (ratio < 0.75) { 
+    // Green to Yellow
+    r = int(1020 * (ratio - 0.5));
+    g = 255;
+    b = 0;
   } else {
-    
-    r = 255; g = 0; b = 0;
+    // Yellow to Red
+    r = 255;
+    g = int(255 - 1020 * (ratio - 0.75));
+    b = 0;
   }
 }
-
