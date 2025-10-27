@@ -9,7 +9,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
 // Connect wifi and get mac address for unique clientId and print out some setup info
 void startWifi(){
   delay(10);
-  LedBlue(); // show Blue LED when looking for wifi
+  LedBlue();  // show Blue LED when looking for wifi
   Serial.print("Connecting to WiFi: ");
   Serial.println(ssid);
 
@@ -32,7 +32,7 @@ void startWifi(){
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
 
-  LedGreen(); // all good so show green for go 
+  LedGreen();  // all good so show green for go
 }
 
 
@@ -58,4 +58,3 @@ void reconnectMQTT() {
   }
   LedGreen();
 }
-
