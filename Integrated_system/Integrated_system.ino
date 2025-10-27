@@ -10,6 +10,8 @@
 
 #define DHTPIN 1  // DHT22 connected to pin 1
 #define DHTTYPE DHT22
+#define SWITCH_PIN 2 //switch connected to pin 2
+
 DHT dht(DHTPIN, DHTTYPE);
 
 /*
@@ -75,7 +77,10 @@ void setup() {
   Serial.println("Set-up complete");
 
   dht.begin();  // Initiate the DHT22 sensor
+
+  pinMode(SWITCH_PIN, INPUT_PULLUP);
 }
+
 
 void loop() {
   // Reconnect if necessary
@@ -88,6 +93,8 @@ void loop() {
   }
   // keep mqtt alive
   mqttClient.loop();
+
+  bool isNightMode = digitalRead(SWITCH_PIN) == LOW; //ON=LOW, OFF=HIGH
 
 
   static unsigned long lastUpdate = 0;
@@ -105,8 +112,14 @@ void loop() {
       int r, g, b;
       temperatureToRGB(temp, r, g, b);  //Temperature variations are mapped to spectral changes
 
-
-
+      if (isNightMode) {
+        
+        float brightnessFactor = 0.2;  // lightness drop to 20%
+        r = int(r * brightnessFactor);
+        g = int(g * brightnessFactor);
+        b = int(b * brightnessFactor);
+        Serial.println("Night mode ON (dimmed)");
+      }
 
 
       for (int pixel = 0; pixel < num_leds; pixel++) {
