@@ -10,7 +10,7 @@
 
 #define DHTPIN 1  // DHT22 connected to pin 1
 #define DHTTYPE DHT22
-#define SWITCH_PIN 2 //switch connected to pin 2
+#define SWITCH_PIN 2  //switch connected to pin 2
 
 DHT dht(DHTPIN, DHTTYPE);
 
@@ -81,6 +81,8 @@ void setup() {
   pinMode(SWITCH_PIN, INPUT_PULLUP);
 }
 
+float currentBrightness = 1.0;
+float targetBrightness = 1.0;
 
 void loop() {
   // Reconnect if necessary
@@ -94,54 +96,62 @@ void loop() {
   // keep mqtt alive
   mqttClient.loop();
 
-  bool isNightMode = digitalRead(SWITCH_PIN) == LOW; //ON=LOW, OFF=HIGH
-
-
-  static unsigned long lastUpdate = 0;
-  unsigned long now = millis();
-
-  if (now - lastUpdate >= 200) {
-    float temp = dht.readTemperature();  //Read the DHT22 datas every 0.2 seconds
-
-    if (isnan(temp)) {
-      Serial.println("Failed to read from DHT22 sensor!");
-    } else {
-      Serial.print("Temperature: ");
-      Serial.println(temp);
-
-      int r, g, b;
-      temperatureToRGB(temp, r, g, b);  //Temperature variations are mapped to spectral changes
-
-      if (isNightMode) {
-        
-        float brightnessFactor = 0.2;  // lightness drop to 20%
-        r = int(r * brightnessFactor);
-        g = int(g * brightnessFactor);
-        b = int(b * brightnessFactor);
-        Serial.println("Night mode ON (dimmed)");
-      }
-
-
-      for (int pixel = 0; pixel < num_leds; pixel++) {
-        RGBpayload[pixel * 3 + 0] = (byte)r;
-        RGBpayload[pixel * 3 + 1] = (byte)g;
-        RGBpayload[pixel * 3 + 2] = (byte)b;
-      }
-
-      mqttClient.publish(mqtt_topic.c_str(), RGBpayload, payload_size);
-
-      Serial.print("Published color RGB(");
-      Serial.print(r);
-      Serial.print(", ");
-      Serial.print(g);
-      Serial.print(", ");
-      Serial.print(b);
-      Serial.println(")");
-    }
-
-    lastUpdate = now;
+  bool isNightMode = (digitalRead(SWITCH_PIN) == LOW);  //ON=LOW, OFF=HIGH
+  if (isNightMode) {
+    targetBrightness = 0.2;
+  } else {
+    targetBrightness = 1.0;
   }
+
+  float temp = dht.readTemperature();
+
+  if (isnan(temp)) {
+    Serial.println("Failed to read from DHT22 sensor!");
+  } else {
+    Serial.print("Temperature: ");
+    Serial.println(temp);
+  }
+
+
+  int r, g, b;
+  temperatureToRGB(temp, r, g, b);  //Temperature variations are mapped to spectral changes
+
+  float step = 0.04;
+  if (abs(currentBrightness - targetBrightness) > 0.01) {
+    if (currentBrightness < targetBrightness)
+      currentBrightness += step;
+    else
+      currentBrightness -= step;
+    currentBrightness = constrain(currentBrightness, 0.0, 1.0);
+  }
+
+  int rDim = int(r * currentBrightness);
+  int gDim = int(g * currentBrightness);
+  int bDim = int(b * currentBrightness);
+
+
+
+  for (int pixel = 0; pixel < num_leds; pixel++) {
+    RGBpayload[pixel * 3 + 0] = (byte)rDim;
+    RGBpayload[pixel * 3 + 1] = (byte)gDim;
+    RGBpayload[pixel * 3 + 2] = (byte)bDim;
+  }
+
+  mqttClient.publish(mqtt_topic.c_str(), RGBpayload, payload_size);
+
+  Serial.print("Published color RGB(");
+  Serial.print(rDim);
+  Serial.print(", ");
+  Serial.print(gDim);
+  Serial.print(", ");
+  Serial.print(bDim);
+  Serial.println(")");
+
+  delay(100);
 }
+
+
+
 
 // Function to update the R, G, B values of a single LED pixel
 // RGB can a value between 0-254, pixel is 0-71 for a 72 neopixel strip
