@@ -114,7 +114,7 @@ void loop() {
 
 
   int r, g, b;
-  temperatureToRGB(temp, r, g, b);  //Temperature variations are mapped to spectral changes
+  Temperature_ColourConversion(temp, r, g, b);  //Temperature variations are mapped to spectral changes
 
   float step = 0.04;
   if (abs(currentBrightness - targetBrightness) > 0.01) {
@@ -222,7 +222,7 @@ void printMacAddress(byte mac[]) {
   Serial.println();
 }
 
-void temperatureToRGB(float temp, int& r, int& g, int& b) {
+void Temperature_ColourConversion(float temp, int& r, int& g, int& b) {
 
   if (temp < 21) temp = 21;
   if (temp > 41) temp = 41;  // Restricted temperature range
