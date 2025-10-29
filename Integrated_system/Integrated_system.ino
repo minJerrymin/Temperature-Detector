@@ -224,41 +224,51 @@ void printMacAddress(byte mac[]) {
 
 void Temperature_ColourConversion(float temp, int& r, int& g, int& b) {
 
-  if (temp < 21) temp = 21;
-  if (temp > 41) temp = 41;  // Restricted temperature range
+  if (temp < 21) temp = 23;
+  if (temp > 27) temp = 27;  // Restricted temperature range
 
-  float ratio = (temp - 21.0) / 20.0;
+  float ratio = (temp - 23.0) / 4.0;
   // Normalise the temperature to obtain a ratio representing the position of the temperature within the RGB interval.
 
-  if (ratio < 0.1667) {
+  if (ratio < 0.125) {
     // Purple to Blue
-    r = int(255 * (ratio / 0.1667));  //0-255
+    r = int(128 * (ratio / 0.125));  //0-128
     g = 0;
     b = 255;
-  } else if (ratio < 0.3333) {
+  } else if (ratio < 0.25) {
     // Blue to Azure
     r = 0;
-    g = int(255 * ((ratio - 0.1667) / 0.1667));  // 0-255
+    g = int(255 * ((ratio - 0.125) / 0.125));  // 0-255
     b = 255;
-  } else if (ratio < 0.5) {
-    // Azure to Green
+  } else if (ratio < 0.375) {
+    // Azure to Blue-Green
     r = 0;
     g = 255;
-    b = int(255 - 255 * ((ratio - 0.3333) / 0.1667));
-  } else if (ratio < 0.6667) {
-    // Green to Yellow
-    r = int(255 * ((ratio - 0.5) / 0.1667));
+    b = int(255 - 128 * ((ratio - 0.25) / 0.125));
+  } else if (ratio < 0.5) {
+    // Blue-Green to Green
+    r = int(64 * ((ratio - 0.375) / 0.125));
+    g = 255;
+    b = int(127 - 127 * ((ratio - 0.375) / 0.125));
+  } else if (ratio < 0.625) {
+    // Green to Yellow-Green
+    r = int(255 * ((ratio - 0.5) / 0.125));
     g = 255;
     b = 0;
-  } else if (ratio < 0.8333) {
-    // Yellow to orange
+  } else if (ratio < 0.75) {
+    // Yellow-Green to Yellow  
     r = 255;
-    g = int(255 - 128 * ((ratio - 0.6667) / 0.1667));
+    g = int(255 - 64 * ((ratio - 0.625) / 0.125));
+    b = 0;
+  } else if (ratio < 0.875) {
+    // Yellow to Orange
+    r = 255;
+    g = int(191 - 64 * ((ratio - 0.75) / 0.125));
     b = 0;
   } else {
     // Orange to Red
     r = 255;
-    g = int(127 - 127 * ((ratio - 0.8333) / 0.1667));
+    g = int(127 - 127 * ((ratio - 0.875) / 0.125));
     b = 0;
   }
 }
