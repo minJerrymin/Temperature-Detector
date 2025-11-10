@@ -72,6 +72,13 @@ Instead of showing numbers on a screen, this project visualizes temperature as c
 
 ![88d33af95364d043f44f6be090248ab5](https://github.com/user-attachments/assets/130926f2-6cbb-460d-9313-1cf44c3443fd)
 
+**Luminaire Color Grid**
+
+[download demo video](demonstration.mp4)
+
+
+
+
 
 
 
