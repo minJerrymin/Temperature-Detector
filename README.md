@@ -63,9 +63,11 @@ Instead of showing numbers on a screen, this project visualizes temperature as c
 
 **Appearance display**
 
+![298bb52ad01cd176cb6e1e3b82093a35](https://github.com/user-attachments/assets/9d475e72-16c5-4bcc-bb57-78c8529db38f)
 
-![d23d20b59819054902dd59bd8081ee33](https://github.com/user-attachments/assets/1eb257d0-4366-412b-99a8-5d61b6454694)
+![d15d88450b7323079f6bb0023cbe8176](https://github.com/user-attachments/assets/b8dbf99f-6797-456c-90eb-b06dc66c2f4f)
 
+![88d33af95364d043f44f6be090248ab5](https://github.com/user-attachments/assets/130926f2-6cbb-460d-9313-1cf44c3443fd)
 
 
 
@@ -75,7 +77,7 @@ Instead of showing numbers on a screen, this project visualizes temperature as c
 
 ## Future Improvements
 
-* Use temperature sensors with higher refresh rates and resolutions such as DHT11 and BME280
+* Use temperature sensors with higher refresh rates and resolutions.
 * Optimising the temperature-colour conversion function enables smoother colour transitions.
 * Add ambient “breathing” animation when temperature is stable
 
