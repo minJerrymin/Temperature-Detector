@@ -1,4 +1,4 @@
-# Temperature-Detector
+# Temperature-Detector — “Feeling the Natural Mood”
 
 **Temperature-Controlled Colour-Changing Lighting System Based on Arduino MKR WiFi 1010 and MQTT Architecture**
 
@@ -18,8 +18,11 @@ Instead of showing numbers on a screen, this project visualizes temperature as c
 
 ---
 ## Concept sketches
-
+**Initial idea**
 ![48c1a1bfb2a75ff964f960df79d2c4d3](https://github.com/user-attachments/assets/09779cfc-8c3e-4dbb-a6b2-59d1960c3978)
+
+**System Workflow Logic**
+![6fa406836d73512d698146f7e9db0fd3](https://github.com/user-attachments/assets/994fd4e2-f1f4-448c-8c33-49fb9b2ec53b)
 
 
 
