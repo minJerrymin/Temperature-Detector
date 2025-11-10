@@ -78,7 +78,7 @@ Instead of showing numbers on a screen, this project visualizes temperature as c
 
 ---
 
-## Future Improvements
+## Possible future Improvements
 
 * Use temperature sensors with higher refresh rates and resolutions.
 * Optimising the temperature-colour conversion function enables smoother colour transitions.
